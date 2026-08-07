@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AB Road — Оплаты</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Mulish:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#FAFAFA;--white:#FFFFFF;--text:#1A1A2E;--text-sec:#555770;
+  --text-muted:#8E8EA0;--text-hint:#BCBCC8;
+  --border:#EDEDF0;
+  --bordeaux:#5C1A3A;
+  --ek-head:#4C1D95;
+  --an-head:#047857;
+  --na-head:#EAB308;
+  --font-head:'Unbounded',sans-serif;--font-body:'Mulish',sans-serif;
+}
+body{font-family:var(--font-body);font-size:14px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+
+.month-bar{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;gap:0;position:sticky;top:0;z-index:10;
+}
+.mtab{
+  padding:10px 16px;border:none;border-bottom:2px solid transparent;
+  background:none;font-family:var(--font-body);font-size:13px;
+  font-weight:500;color:var(--text-muted);cursor:pointer;transition:all 0.15s;
+}
+.mtab:hover{color:var(--text-sec);}
+.mtab.active{color:var(--text);border-bottom-color:var(--bordeaux);font-weight:700;}
+
+.main{max-width:1500px;margin:0 auto;padding:24px 24px 60px;}
+
+.teachers-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:20px;align-items:start;
+}
+@media(max-width:1050px){.teachers-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:680px){.teachers-grid{grid-template-columns:1fr;}}
+
+.teacher-col{display:flex;flex-direction:column;gap:12px;animation:fadeUp 0.3s ease both;}
+.teacher-col:nth-child(2){animation-delay:0.05s;}
+.teacher-col:nth-child(3){animation-delay:0.1s;}
+
+.g-block{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+
+.g-head{
+  padding:11px 16px;display:flex;align-items:center;gap:8px;
+  cursor:pointer;user-select:none;transition:opacity 0.15s;
+}
+.g-head:hover{opacity:0.85;}
+.g-head.ek{background:var(--ek-head);}
+.g-head.an{background:var(--an-head);}
+.g-head.na{background:var(--na-head);}
+
+.g-chevron{
+  font-size:10px;color:rgba(255,255,255,0.6);
+  transition:transform 0.2s;flex-shrink:0;
+}
+.g-block.collapsed .g-chevron{transform:rotate(-90deg);}
+
+.g-name{font-size:14px;font-weight:700;color:#fff;flex:1;min-width:0;}
+.g-head.na .g-name{color:#78350F;}
+.g-head.na .g-chevron{color:rgba(120,53,15,0.5);}
+.g-head.na .g-ratio{color:rgba(120,53,15,0.6);}
+
+.g-ratio{font-size:11px;color:rgba(255,255,255,0.7);font-weight:600;white-space:nowrap;}
+.g-block.all-paid .g-ratio{color:#fff;}
+.g-check{font-size:14px;margin-left:4px;color:#4ADE80;}
+
+.g-list{overflow:hidden;}
+.g-block.collapsed .g-list{display:none;}
+
+.s-row{
+  display:flex;align-items:baseline;gap:10px;
+  padding:8px 16px;border-bottom:1px solid var(--border);
+}
+.s-row:last-child{border-bottom:none;}
+
+.s-name{font-size:13px;font-weight:500;color:#C53030;line-height:1.4;flex:1;min-width:0;}
+.s-row.is-paid .s-name{color:#6EBD7B;text-decoration:line-through;}
+.s-comment{font-size:11px;color:var(--text-muted);font-weight:500;white-space:nowrap;flex-shrink:0;}
+
+.loading{text-align:center;padding:80px 20px;color:var(--text-muted);font-size:13px;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--bordeaux);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="month-bar" id="months"></div>
+<div class="main">
+  <div id="content"><div class="loading"><div class="spinner"></div>Загрузка…</div></div>
+</div>
+<script>
+const SHEET_ID='1MmK4tT43NDV85VS8VXClv7VajtidGiiNe-2OYz_oxms';
+const PAY_SHEET='Оплаты';
+const TOTAL_SHEET='Total';
+const MONTHS_ALL=['Сентябрь','Октябрь','Ноябрь','Декабрь','Январь','Февраль','Март','Апрель','Май'];
+const TEACHER_ORDER=['ek','an','na'];
+
+let students=[],monthCols=[],groupTeacher={},selMonth=null;
+
+function gvizUrl(id,name){
+  return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name);
+}
+
+async function fetchSheet(id,name){
+  const r=await fetch(gvizUrl(id,name),{cache:'no-store'});
+  const t=await r.text();
+  const m=t.match(/google\.visualization\.Query\.setResponse\(({.*})\)/s);
+  if(!m)throw new Error('Неожиданный формат');
+  const raw=m[1].replace(/new Date\((\d+),(\d+),(\d+)\)/g,'"Date($1,$2,$3)"');
+  return JSON.parse(raw);
+}
+
+function parseTotal(json){
+  const hdr=json.table.cols.map(c=>(c.label||'').trim());
+  const iG=hdr.findIndex(h=>/группа/i.test(h));
+  const iT=hdr.findIndex(h=>/учитель|преподаватель/i.test(h));
+  if(iG<0||iT<0)return;
+  groupTeacher={};
+  for(const row of json.table.rows){
+    const cv=(i)=>{if(i<0||!row.c?.[i])return'';const c=row.c[i];return(c.f||(c.v!=null?String(c.v):'')).trim();};
+    const g=cv(iG),t=cv(iT);
+    if(g&&t&&!groupTeacher[g])groupTeacher[g]=t;
+  }
+}
+
+function parsePayments(json){
+  const hdr=json.table.cols.map(c=>(c.label||'').trim());
+  const iN=hdr.findIndex(h=>/студент/i.test(h));
+  const iG=hdr.findIndex(h=>/группа/i.test(h));
+
+  monthCols=[];
+  for(let i=0;i<hdr.length;i++){
+    if(/оплачено|комментар/i.test(hdr[i]))continue;
+    const mo=MONTHS_ALL.find(m=>hdr[i].toLowerCase()===m.toLowerCase());
+    if(mo){
+      const iP=(i+1<hdr.length&&/оплачено/i.test(hdr[i+1]))?i+1:-1;
+      const iC=(i+2<hdr.length&&/комментар/i.test(hdr[i+2]))?i+2:-1;
+      monthCols.push({name:mo,iPaid:iP,iCom:iC});
+    }
+  }
+
+  students=[];
+  for(const row of json.table.rows){
+    const cv=(i)=>{if(i<0||!row.c?.[i])return'';const c=row.c[i];return(c.f||(c.v!=null?String(c.v):'')).trim();};
+    const name=cv(iN);
+    if(!name)continue;
+    const group=cv(iG);
+    const teacher=groupTeacher[group]||'';
+    const s={name,group,teacher,months:{}};
+    for(const mc of monthCols){
+      const pv=mc.iPaid>=0?cv(mc.iPaid):'';
+      const paid=/да|yes|true|оплачен/i.test(pv);
+      const comment=mc.iCom>=0?cv(mc.iCom):'';
+      s.months[mc.name]={paid,comment};
+    }
+    students.push(s);
+  }
+}
+
+function visibleMonths(){
+  const cm=new Date().getMonth()+1;
+  let curIdx;
+  if(cm>=9)curIdx=cm-9;
+  else if(cm<=5)curIdx=cm+3;
+  else curIdx=0;
+  return monthCols.map(mc=>mc.name).filter((_,i)=>i<=curIdx);
+}
+
+function teacherCss(t){
+  if(/анастасия/i.test(t))return'an';
+  if(/екатерина/i.test(t))return'ek';
+  if(/наталья/i.test(t))return'na';
+  return'an';
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+
+function render(){
+  const months=visibleMonths();
+  if(!months.length){document.getElementById('content').innerHTML='<div class="loading">Нет данных</div>';return;}
+  if(!selMonth||!months.includes(selMonth))selMonth=months[months.length-1];
+
+  document.getElementById('months').innerHTML=months.map(m=>
+    `<button class="mtab${m===selMonth?' active':''}" onclick="selMonth='${m}';render()">${m}</button>`
+  ).join('');
+
+  if(!students.length){document.getElementById('content').innerHTML='<div class="loading">Нет данных</div>';return;}
+
+  const byT={};
+  for(const s of students){
+    const css=teacherCss(s.teacher);
+    if(!byT[css])byT[css]={groups:{}};
+    if(!byT[css].groups[s.group])byT[css].groups[s.group]=[];
+    byT[css].groups[s.group].push(s);
+  }
+  const sorted=Object.entries(byT).sort((a,b)=>
+    TEACHER_ORDER.indexOf(a[0])-TEACHER_ORDER.indexOf(b[0])
+  );
+
+  let html='<div class="teachers-grid">';
+  for(const[css,td]of sorted){
+    html+=`<div class="teacher-col">`;
+    for(const[gN,kids]of Object.entries(td.groups)){
+      const total=kids.length;
+      const paidCount=kids.filter(k=>k.months[selMonth]?.paid).length;
+      const allPaid=paidCount===total;
+
+      html+=`<div class="g-block collapsed${allPaid?' all-paid':''}">`;
+      html+=`<div class="g-head ${css}">`;
+      html+=`<span class="g-chevron">▾</span>`;
+      html+=`<span class="g-name">${esc(gN)}</span>`;
+      html+=`<span class="g-ratio">${paidCount} / ${total}${allPaid?' <span class="g-check">✓</span>':''}</span>`;
+      html+=`</div>`;
+
+      const sorted_kids=[...kids].sort((a,b)=>{
+        const ap=a.months[selMonth]?.paid?1:0;
+        const bp=b.months[selMonth]?.paid?1:0;
+        return ap-bp;
+      });
+      html+=`<div class="g-list">`;
+      for(const k of sorted_kids){
+        const md=k.months[selMonth]||{};
+        html+=`<div class="s-row${md.paid?' is-paid':''}">`;
+        html+=`<span class="s-name">${esc(k.name)}</span>`;
+        if(md.comment)html+=`<span class="s-comment">${esc(md.comment)}</span>`;
+        html+=`</div>`;
+      }
+      html+=`</div>`;
+      html+=`</div>`;
+    }
+    html+='</div>';
+  }
+  html+='</div>';
+  document.getElementById('content').innerHTML=html;
+}
+
+document.getElementById('content').addEventListener('click',function(e){
+  const head=e.target.closest('.g-head');
+  if(!head)return;
+  head.parentElement.classList.toggle('collapsed');
+});
+
+async function loadData(){
+  try{
+    const[payJson,totalJson]=await Promise.all([
+      fetchSheet(SHEET_ID,PAY_SHEET),
+      fetchSheet(SHEET_ID,TOTAL_SHEET)
+    ]);
+    parseTotal(totalJson);
+    parsePayments(payJson);
+    render();
+  }catch(e){
+    document.getElementById('content').innerHTML=`<div class="loading">Ошибка: ${esc(e.message)}</div>`;
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
