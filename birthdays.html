@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AB Road — Дни рождения</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Mulish:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bordeaux:#551136;--pink:#F2A7BB;--pink-light:#FDF0F4;
+  --white:#FFFFFF;--bg:#FAFAFA;
+  --text:#1A1A2E;--text-sec:#555770;--text-muted:#8E8EA0;--text-hint:#BCBCC8;
+  --border:#EDEDF0;
+  --an:#047857;--an-bg:#ECFDF5;--an-tag:#065F46;--an-tag-bg:#D1FAE5;--an-icon:#6EE7B7;
+  --ek:#5B21B6;--ek-bg:#EDE9FE;--ek-tag:#4C1D95;--ek-tag-bg:#DDD6FE;--ek-icon:#C4B5FD;
+  --na:#CA8A04;--na-bg:#FEF9C3;--na-tag:#92400E;--na-tag-bg:#FEF08A;--na-icon:#FDE047;
+  --font-head:'Unbounded',sans-serif;--font-body:'Mulish',sans-serif;
+}
+body{font-family:var(--font-body);font-size:14px;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;padding:20px;}
+
+.page{max-width:900px;margin:0 auto;}
+
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+
+/* ── SECTION ── */
+.section{margin-bottom:0;}
+.section-title{
+  font-family:var(--font-head);font-size:12px;font-weight:700;
+  color:var(--bordeaux);margin-bottom:12px;
+  display:flex;align-items:center;gap:6px;
+}
+.section-icon{font-size:16px;line-height:1;}
+.section-title.upcoming{color:var(--text-sec);}
+
+/* ── CARD ── */
+.cards{display:flex;flex-direction:column;gap:10px;}
+
+.card{
+  background:var(--white);border-radius:12px;
+  padding:12px 14px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+  display:flex;align-items:center;gap:12px;
+  transition:box-shadow 0.15s;
+}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08),0 6px 24px rgba(0,0,0,0.06);}
+
+/* Today cards — full teacher color */
+.card.today.t-an{background:var(--an-bg);border-left:3px solid var(--an);}
+.card.today.t-ek{background:var(--ek-bg);border-left:3px solid var(--ek);}
+.card.today.t-na{background:var(--na-bg);border-left:3px solid var(--na);}
+
+/* Upcoming cards — gray background, only left border colored */
+.card:not(.today){background:#F5F5F5;border-left:3px solid transparent;}
+.card:not(.today).t-an{border-left-color:var(--an);}
+.card:not(.today).t-ek{border-left-color:var(--ek);}
+.card:not(.today).t-na{border-left-color:var(--na);}
+
+
+.card-body{flex:1;min-width:0;}
+
+.card-name-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+.card-surname{font-size:16px;font-weight:700;color:var(--text);}
+.card-firstname{font-size:15px;font-weight:700;color:var(--text);}
+.card-rel{
+  font-size:11px;color:var(--text-hint);margin-left:auto;flex-shrink:0;
+}
+.card.today .card-rel{
+  background:var(--bordeaux);color:#fff;font-weight:700;
+  font-size:10px;padding:3px 10px;border-radius:10px;
+}
+
+.card-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+
+.card-group{
+  font-family:var(--font-head);font-size:9px;font-weight:700;
+  padding:3px 10px;border-radius:10px;
+  text-transform:uppercase;letter-spacing:0.03em;
+}
+.card.t-an .card-group{background:var(--an-tag-bg);color:var(--an-tag);}
+.card.t-ek .card-group{background:var(--ek-tag-bg);color:var(--ek-tag);}
+.card.t-na .card-group{background:var(--na-tag-bg);color:var(--na-tag);}
+
+.card-age{font-size:13px;font-weight:600;color:var(--text);}
+.card-date{font-size:12px;color:var(--text-muted);}
+
+/* ── EMPTY ── */
+.empty{
+  text-align:center;padding:60px 20px;
+  color:var(--text-muted);font-size:14px;
+}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-small{color:var(--text-hint);font-size:13px;padding:16px 0;}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:60px 20px;color:var(--text-muted);font-size:13px;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--bordeaux);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  body{padding:10px;}
+  .columns{gap:16px;}
+  .card{padding:10px 12px;}
+  .card-surname{font-size:14px;}
+  .card-firstname{font-size:13px;}
+  .section-title{font-size:11px;}
+}
+</style>
+</head>
+<body>
+<div class="page" id="app">
+  <div class="loading"><div class="spinner"></div>Загрузка…</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// НАСТРОЙКИ — вставь ID своей Google Таблицы
+// ═══════════════════════════════════════════════════════
+const SHEET_ID   = '1MmK4tT43NDV85VS8VXClv7VajtidGiiNe-2OYz_oxms';          // ← сюда ID таблицы
+const SHEET_NAME = 'Total';     // ← название вкладки
+// ═══════════════════════════════════════════════════════
+
+const MONTHS_GEN = ['','января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+function parseDob(v){
+  if(!v)return null;
+  if(v instanceof Date) return v;
+  const s=String(v).trim();
+  // yyyy-MM-dd
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+  // dd.MM.yyyy
+  m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if(m)return new Date(+m[3],+m[2]-1,+m[1]);
+  return null;
+}
+
+function daysUntil(dob){
+  const today=new Date();today.setHours(0,0,0,0);
+  const thisYear=new Date(today.getFullYear(),dob.getMonth(),dob.getDate());
+  if(thisYear<today)thisYear.setFullYear(thisYear.getFullYear()+1);
+  return Math.round((thisYear-today)/86400000);
+}
+
+function turningAge(dob){
+  const today=new Date();today.setHours(0,0,0,0);
+  let a=today.getFullYear()-dob.getFullYear();
+  const diff=daysUntil(dob);
+  if(diff>0)a++;
+  return a;
+}
+
+function ageWord(n){
+  const m=n%100, d=n%10;
+  if(m>=11&&m<=19)return n+' лет';
+  if(d===1)return n+' год';
+  if(d>=2&&d<=4)return n+' года';
+  return n+' лет';
+}
+
+function relLabel(diff){
+  if(diff===0)return 'сегодня';
+  if(diff===1)return 'завтра';
+  if(diff===2)return 'послезавтра';
+  return 'через '+diff+' '+(diff%10===1&&diff!==11?'день':diff%10>=2&&diff%10<=4&&(diff<10||diff>20)?'дня':'дней');
+}
+
+function formatDate(dob){
+  return dob.getDate()+' '+MONTHS_GEN[dob.getMonth()+1];
+}
+
+function teacherCss(b){
+  const t=b.teacher||'';
+  if(/анастасия/i.test(t))return 't-an';
+  if(/екатерина/i.test(t))return 't-ek';
+  if(/наталья/i.test(t))return 't-na';
+  return 't-an';
+}
+
+function renderCard(b, isToday){
+  const parts=b.name.split(/\s+/);
+  const surname=parts[0]||'';
+  const firstname=parts.slice(1).join(' ')||'';
+  const tc=teacherCss(b);
+  return `<div class="card ${tc}${isToday?' today':''}">
+    <div class="card-body">
+      <div class="card-name-row">
+        <span class="card-surname">${esc(surname)}</span>
+        <span class="card-firstname">${esc(firstname)}</span>
+        <span class="card-rel">${relLabel(b.diff)}</span>
+      </div>
+      <div class="card-meta">
+        <span class="card-group">${esc(b.group)}</span>
+        <span class="card-age">${ageWord(b.age)}</span>
+        <span class="card-date">${formatDate(b.dob)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render(data){
+  const today=new Date();today.setHours(0,0,0,0);
+
+  const items=data
+    .map(r=>{
+      const dob=parseDob(r.dob);
+      if(!dob)return null;
+      const diff=daysUntil(dob);
+      const age=turningAge(dob);
+      return{name:r.name,group:r.group,teacher:r.teacher,dob,diff,age};
+    })
+    .filter(r=>r&&r.diff>=0&&r.diff<=7)
+    .sort((a,b)=>a.diff-b.diff);
+
+  const todayItems=items.filter(r=>r.diff===0);
+  const upcomingItems=items.filter(r=>r.diff>0);
+  const el=document.getElementById('app');
+
+  if(!items.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">🎈</div>В ближайшую неделю дней рождения нет</div>';
+    return;
+  }
+
+  let html='<div class="columns">';
+
+  html+='<div class="section">';
+  if(todayItems.length){
+    html+='<div class="section-title"><span class="section-icon">🎂</span>Сегодня именинники</div>';
+    html+='<div class="cards">'+todayItems.map(b=>renderCard(b,true)).join('')+'</div>';
+  } else {
+    html+='<div class="section-title"><span class="section-icon">🎂</span>Сегодня</div>';
+    html+='<div class="empty-small">Именинников нет</div>';
+  }
+  html+='</div>';
+
+  html+='<div class="section">';
+  if(upcomingItems.length){
+    html+='<div class="section-title upcoming"><span class="section-icon">🎂</span>Ближайшие дни рождения</div>';
+    html+='<div class="cards">'+upcomingItems.map(b=>renderCard(b,false)).join('')+'</div>';
+  } else {
+    html+='<div class="section-title upcoming"><span class="section-icon">🎂</span>Ближайшие</div>';
+    html+='<div class="empty-small">В ближайшую неделю нет</div>';
+  }
+  html+='</div>';
+
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ── GOOGLE VISUALIZATION API ──
+function gvizUrl(id,name){
+  return 'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name);
+}
+
+function parseGviz(json){
+  const cols=json.table.cols, rows=json.table.rows;
+  const hdr=cols.map(c=>(c.label||'').trim());
+
+  // Ищем столбцы по заголовкам, fallback на фиксированные индексы
+  let iN=hdr.findIndex(h=>/студент|имя|фио|ребён/i.test(h));
+  let iG=hdr.findIndex(h=>/группа/i.test(h));
+  let iT=hdr.findIndex(h=>/учитель|преподаватель/i.test(h));
+  let iB=hdr.findIndex(h=>/рожден|д[\.\s]?р/i.test(h));
+  if(iN<0) iN=1;  // B
+  if(iG<0) iG=2;  // C
+  if(iT<0) iT=14; // O
+  if(iB<0) iB=20; // U
+
+  const result=[];
+  for(const row of rows){
+    const cv=(i)=>{
+      if(i<0||!row.c?.[i]) return null;
+      return row.c[i];
+    };
+    const nc=cv(iN); const name=nc?(nc.f||String(nc.v||'')).trim():'';
+    if(!name) continue;
+
+    const gc=cv(iG); const group=gc?(gc.f||String(gc.v||'')).trim():'';
+    const tc=cv(iT); const teacher=tc?(tc.f||String(tc.v||'')).trim():'';
+
+    const bc=cv(iB);
+    if(!bc) continue;
+    let dobStr='';
+    if(bc.v && typeof bc.v==='string' && bc.v.startsWith('Date(')){
+      const m=bc.v.match(/Date\((\d+),(\d+),(\d+)\)/);
+      if(m) dobStr=m[1]+'-'+String(+m[2]+1).padStart(2,'0')+'-'+m[3].padStart(2,'0');
+    } else if(bc.f){
+      dobStr=bc.f;
+    } else if(bc.v){
+      dobStr=String(bc.v);
+    }
+    if(!dobStr) continue;
+
+    result.push({name, group, teacher, dob:dobStr});
+  }
+  return result;
+}
+
+// ── DEMO ──
+function loadDemo(){
+  const today=new Date();
+  const fmt=(d)=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const offset=(n,year)=>{const d=new Date(today);d.setDate(d.getDate()+n);d.setFullYear(year);return fmt(d);};
+  render([
+    {name:'Кожакин Матвей',group:'Rome',dob:offset(0,2014)},
+    {name:'Эльтарова Алина',group:'Amsterdam',dob:offset(0,2015)},
+    {name:'Журавлёв Дмитрий',group:'Budapest',dob:offset(1,2013)},
+    {name:'Красикова Василиса',group:'Berlin',dob:offset(3,2014)},
+    {name:'Газахмаева Амина',group:'Andorra',dob:offset(5,2015)},
+    {name:'Федотова Дарья',group:'Vilnius',dob:offset(6,2013)},
+  ]);
+}
+
+// ── LOAD ──
+async function loadData(){
+  if(!SHEET_ID){loadDemo();return;}
+  try{
+    const r=await fetch(gvizUrl(SHEET_ID,SHEET_NAME),{cache:'no-store'});
+    const t=await r.text();
+    const m=t.match(/google\.visualization\.Query\.setResponse\(({.*})\)/s);
+    if(!m) throw new Error('Не удалось прочитать таблицу');
+    const json=JSON.parse(m[1]);
+    const data=parseGviz(json);
+    render(data);
+  }catch(e){
+    document.getElementById('app').innerHTML='<div class="loading">Ошибка: '+esc(e.message)+'</div>';
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
