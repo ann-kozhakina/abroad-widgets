@@ -84,6 +84,13 @@ body{font-family:var(--font-body);font-size:14px;background:var(--bg);color:var(
 .card-age{font-size:13px;font-weight:600;color:var(--text);}
 .card-date{font-size:12px;color:var(--text-muted);}
 
+/* ── STAFF CARD ── */
+.card.staff{background:var(--pink-light);border-left:3px solid var(--bordeaux);}
+.card.staff .card-group{background:var(--bordeaux);color:#fff;}
+.card.staff .card-rel{background:var(--bordeaux);color:#fff;font-weight:700;font-size:10px;padding:3px 10px;border-radius:10px;}
+.card.staff .card-icon-star{margin-right:4px;font-size:14px;}
+.card.staff .card-surname,.card.staff .card-firstname{color:var(--bordeaux);}
+
 /* ── EMPTY ── */
 .empty{
   text-align:center;padding:60px 20px;
@@ -172,6 +179,13 @@ function formatDate(dob){
   return dob.getDate()+' '+MONTHS_GEN[dob.getMonth()+1];
 }
 
+const STAFF=[
+  {name:'Аксенова Анастасия',role:'Педагог',dob:'1983-12-01'},
+  {name:'Присенко Екатерина',role:'Педагог',dob:'1999-11-09'},
+  {name:'Блохина Наталья',role:'Педагог',dob:'1985-03-20'},
+  {name:'Кожакина Анна',role:'Руководитель',dob:'1990-06-10'},
+];
+
 function teacherCss(b){
   const t=b.teacher||'';
   if(/анастасия/i.test(t))return 't-an';
@@ -201,19 +215,48 @@ function renderCard(b, isToday){
   </div>`;
 }
 
+function renderStaffCard(b){
+  const parts=b.name.split(/\s+/);
+  const surname=parts[0]||'';
+  const firstname=parts.slice(1).join(' ')||'';
+  return `<div class="card staff">
+    <div class="card-body">
+      <div class="card-name-row">
+        <span class="card-icon-star">⭐</span>
+        <span class="card-surname">${esc(surname)}</span>
+        <span class="card-firstname">${esc(firstname)}</span>
+        <span class="card-rel">${relLabel(b.diff)}</span>
+      </div>
+      <div class="card-meta">
+        <span class="card-date">${formatDate(b.dob)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
 function render(data){
   const today=new Date();today.setHours(0,0,0,0);
 
-  const items=data
+  const kidItems=data
     .map(r=>{
       const dob=parseDob(r.dob);
       if(!dob)return null;
       const diff=daysUntil(dob);
       const age=turningAge(dob);
-      return{name:r.name,group:r.group,teacher:r.teacher,dob,diff,age};
+      return{name:r.name,group:r.group,teacher:r.teacher,dob,diff,age,staff:false};
     })
-    .filter(r=>r&&r.diff>=0&&r.diff<=7)
-    .sort((a,b)=>a.diff-b.diff);
+    .filter(r=>r&&r.diff>=0&&r.diff<=7);
+
+  const staffItems=STAFF
+    .map(s=>{
+      const dob=parseDob(s.dob);
+      if(!dob)return null;
+      const diff=daysUntil(dob);
+      return{name:s.name,role:s.role,dob,diff,staff:true};
+    })
+    .filter(r=>r&&r.diff>=0&&r.diff<=7);
+
+  const items=[...staffItems,...kidItems].sort((a,b)=>a.diff-b.diff);
 
   const todayItems=items.filter(r=>r.diff===0);
   const upcomingItems=items.filter(r=>r.diff>0);
@@ -229,7 +272,7 @@ function render(data){
   html+='<div class="section">';
   if(todayItems.length){
     html+='<div class="section-title"><span class="section-icon">🎂</span>Сегодня именинники</div>';
-    html+='<div class="cards">'+todayItems.map(b=>renderCard(b,true)).join('')+'</div>';
+    html+='<div class="cards">'+todayItems.map(b=>b.staff?renderStaffCard(b):renderCard(b,true)).join('')+'</div>';
   } else {
     html+='<div class="section-title"><span class="section-icon">🎂</span>Сегодня</div>';
     html+='<div class="empty-small">Именинников нет</div>';
@@ -239,7 +282,7 @@ function render(data){
   html+='<div class="section">';
   if(upcomingItems.length){
     html+='<div class="section-title upcoming"><span class="section-icon">🎂</span>Ближайшие дни рождения</div>';
-    html+='<div class="cards">'+upcomingItems.map(b=>renderCard(b,false)).join('')+'</div>';
+    html+='<div class="cards">'+upcomingItems.map(b=>b.staff?renderStaffCard(b):renderCard(b,false)).join('')+'</div>';
   } else {
     html+='<div class="section-title upcoming"><span class="section-icon">🎂</span>Ближайшие</div>';
     html+='<div class="empty-small">В ближайшую неделю нет</div>';
@@ -263,7 +306,7 @@ function parseGviz(json){
   let iN=hdr.findIndex(h=>/студент|имя|фио|ребён/i.test(h));
   let iG=hdr.findIndex(h=>/группа/i.test(h));
   let iT=hdr.findIndex(h=>/учитель|преподаватель/i.test(h));
-  let iB=hdr.findIndex(h=>/рожден|д[\.\s]?р/i.test(h));
+  let iB=hdr.findIndex(h=>/рожден/i.test(h));
   if(iN<0) iN=1;  // B
   if(iG<0) iG=2;  // C
   if(iT<0) iT=14; // O
@@ -322,7 +365,8 @@ async function loadData(){
     const t=await r.text();
     const m=t.match(/google\.visualization\.Query\.setResponse\(({.*})\)/s);
     if(!m) throw new Error('Не удалось прочитать таблицу');
-    const json=JSON.parse(m[1]);
+    const raw=m[1].replace(/new Date\((\d+),(\d+),(\d+)\)/g,'"Date($1,$2,$3)"');
+    const json=JSON.parse(raw);
     const data=parseGviz(json);
     render(data);
   }catch(e){
