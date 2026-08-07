@@ -154,10 +154,9 @@ function daysUntil(dob){
 
 function turningAge(dob){
   const today=new Date();today.setHours(0,0,0,0);
-  let a=today.getFullYear()-dob.getFullYear();
-  const diff=daysUntil(dob);
-  if(diff>0)a++;
-  return a;
+  const nextBday=new Date(today.getFullYear(),dob.getMonth(),dob.getDate());
+  if(nextBday<today)nextBday.setFullYear(nextBday.getFullYear()+1);
+  return nextBday.getFullYear()-dob.getFullYear();
 }
 
 function ageWord(n){
