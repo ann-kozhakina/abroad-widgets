@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Отчёт · Тестирование · Весна 2026 · AB Road</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Mulish:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bordeaux: #5C1A3A;
+  --teal: #2BBFBF;
+  --white: #FFFFFF;
+  --bg: #F7F5F2;
+  --bg2: #EEEBE6;
+  --border: rgba(0,0,0,.08);
+  --text: #1A1210;
+  --text-muted: #7A6E6A;
+  --text-hint: #B0A8A4;
+  --font-head: 'Unbounded', sans-serif;
+  --font-body: 'Mulish', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+.page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+/* ── HEADER ── */
+.rpt-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px; flex-wrap: wrap; gap: 12px; }
+.rpt-title  { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--bordeaux); line-height: 1.2; }
+.rpt-sub    { font-family: var(--font-head); font-size: 10px; font-weight: 400; color: var(--text-hint); margin-top: 5px; letter-spacing: .06em; }
+.rpt-meta   { font-size: 11px; color: var(--text-hint); text-align: right; }
+
+/* ── SECTION ── */
+.section       { margin-bottom: 48px; }
+.section-title { font-family: var(--font-head); font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 16px; }
+
+/* ── SUMMARY CARDS ── */
+.sum-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.sum-card  { background: var(--white); border: 0.5px solid var(--border); border-radius: 20px; padding: 24px 26px; }
+.sum-lbl   { font-family: var(--font-head); font-size: 8px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 12px; }
+.sum-val   { font-family: var(--font-head); font-size: 48px; font-weight: 700; color: var(--bordeaux); line-height: 1; letter-spacing: -.03em; }
+.sum-val .u { font-size: 20px; font-weight: 400; opacity: .4; }
+.sum-note  { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+/* ── КРАТКАЯ СВОДКА ── */
+.svod-box   { background: var(--bordeaux); border-radius: 20px; padding: 26px 28px 24px; margin-bottom: 48px; }
+.svod-title { font-family: var(--font-head); font-size: 8px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 20px; }
+.svod-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; margin-bottom: 20px; }
+.svod-tile  { background: rgba(255,255,255,.08); border-radius: 14px; padding: 18px 20px; }
+.svod-tile-lbl  { font-family: var(--font-head); font-size: 8px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 10px; }
+.svod-tile-main { font-family: var(--font-head); font-size: 24px; font-weight: 700; color: #fff;
+  line-height: 1.1; margin-bottom: 4px; }
+.svod-tile-sub  { font-size: 13px; color: rgba(255,255,255,.65); }
+.svod-tile-val  { font-family: var(--font-head); font-size: 32px; font-weight: 700; color: var(--teal);
+  line-height: 1; }
+.svod-divider   { height: 0.5px; background: rgba(255,255,255,.15); margin-bottom: 16px; }
+.svod-skills    { display: flex; flex-wrap: wrap; gap: 8px; }
+.svod-skill-tag { background: rgba(255,255,255,.1); border-radius: 10px; padding: 8px 14px; }
+.svod-skill-lvl { font-family: var(--font-head); font-size: 8px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 4px; }
+.svod-skill-name{ font-family: var(--font-head); font-size: 12px; font-weight: 700; color: rgba(255,255,255,.9); }
+
+/* ── LEVEL CARDS ── */
+.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 18px; }
+.level-card {
+  background: var(--white); border: 0.5px solid var(--border);
+  border-radius: 22px; padding: 28px 28px 26px;
+}
+.level-tag {
+  display: inline-flex; font-family: var(--font-head); font-size: 10px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; padding: 5px 14px; border-radius: 8px; margin-bottom: 20px;
+}
+.lc-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.lc-mini { background: var(--bg2); border-radius: 14px; padding: 16px 18px; text-align: center; }
+.lc-mini-v { font-family: var(--font-head); font-size: 36px; font-weight: 700; line-height: 1; }
+.lc-mini-l { font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.4; }
+.bars-title { font-family: var(--font-head); font-size: 9px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-hint); margin-bottom: 10px; }
+.skill-bars  { display: flex; flex-direction: column; gap: 8px; }
+.sb-row      { display: grid; grid-template-columns: 80px 1fr 42px; align-items: center; gap: 8px; }
+.sb-lbl      { font-size: 12px; color: var(--text-muted); }
+.sb-track    { height: 8px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+.sb-fill     { height: 100%; border-radius: 4px; opacity: .85; }
+.sb-pct      { font-family: var(--font-head); font-size: 11px; font-weight: 700; text-align: right; }
+.weak-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-head); font-size: 10px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(92,26,58,.1); color: var(--bordeaux);
+  padding: 6px 14px; border-radius: 7px; margin-top: 16px;
+}
+.weak-tag::before { content: '↓'; font-size: 12px; }
+
+/* ── LEVEL CARD ROW GROUPING ── */
+.level-row-header {
+  display: flex; align-items: center; gap: 12px; margin: 20px 0 10px;
+}
+.level-row-header:first-child { margin-top: 0; }
+.lrh-line { flex: 1; height: 0.5px; background: var(--border); }
+.lrh-label { font-family: var(--font-head); font-size: 8px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-hint); white-space: nowrap; }
+
+/* ── GROUP SECTION ── */
+.level-group-section { margin-bottom: 36px; }
+.lgs-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.lgs-tag {
+  font-family: var(--font-head); font-size: 9px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; padding: 4px 12px; border-radius: 7px;
+}
+.lgs-line { flex: 1; height: 0.5px; background: var(--border); }
+
+.group-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; }
+.group-card  {
+  background: var(--white); border: 0.5px solid var(--border);
+  border-radius: 20px; min-width: 440px; flex: 1 1 440px; max-width: 620px;
+  overflow: hidden;
+}
+.gc-head  { padding: 18px 24px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.gc-name  { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+.gc-count { font-size: 12px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+
+.gc-zone        { padding: 14px 24px 16px; }
+.gc-zone.z-pass { background: rgba(43,191,191,.07); border-top: 0.5px solid rgba(43,191,191,.2); }
+.gc-zone.z-low  { background: rgba(92,26,58,.05);  border-top: 0.5px solid rgba(92,26,58,.15); }
+.gc-zone.z-empty { border-top: 0.5px solid var(--border); padding: 14px 24px; }
+
+.gz-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.gz-dot    { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.gz-dot.pass { background: var(--teal); }
+.gz-dot.low  { background: var(--bordeaux); opacity: .7; }
+.gz-lbl    { font-family: var(--font-head); font-size: 9px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; }
+.gz-lbl.pass { color: #0A6A6A; }
+.gz-lbl.low  { color: var(--bordeaux); }
+.gz-cnt    { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
+.stu-row   { display: flex; align-items: center; gap: 8px; padding: 7px 0;
+  border-bottom: 0.5px solid rgba(0,0,0,.05); }
+.stu-row:last-child { border-bottom: none; }
+.stu-name  { flex: 1; font-size: 14px; font-weight: 600; line-height: 1.3; }
+.stu-score { font-family: var(--font-head); font-size: 14px; font-weight: 700;
+  min-width: 42px; text-align: right; flex-shrink: 0; }
+.stu-score.pass { color: #0A6A6A; }
+.stu-score.low  { color: var(--bordeaux); }
+.stu-skill { font-family: var(--font-head); font-size: 9px; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  background: rgba(92,26,58,.1); color: var(--bordeaux);
+  padding: 3px 8px 3px 5px; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }
+.gc-none   { font-size: 12px; color: var(--text-hint); font-style: italic; }
+
+/* ── LOADING ── */
+.loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 14px; color: var(--text-hint); }
+.spinner { width: 26px; height: 26px; border: 2.5px solid var(--bg2); border-top-color: var(--teal); border-radius: 50%; animation: spin .75s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── LEVEL COLORS ── */
+.lc-starters { background: rgba(212,133,10,.12); color: #9A5C00; }
+.lc-movers   { background: rgba(107,53,168,.10); color: #5A2080; }
+.lc-flyers   { background: rgba(42,122,42,.10);  color: #1A6020; }
+.lc-key      { background: rgba(26,106,154,.12); color: #0A4A7A; }
+.lc-pet      { background: rgba(139,31,90,.10);  color: #6A0040; }
+.lc-other    { background: var(--bg2); color: var(--text-muted); }
+.tc-starters { color: #9A5C00; }
+.tc-movers   { color: #5A2080; }
+.tc-flyers   { color: #1A6020; }
+.tc-key      { color: #0A4A7A; }
+.tc-pet      { color: #6A0040; }
+
+@media print {
+  body { background: white; }
+  .section { break-inside: avoid; }
+  .page { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div id="app"><div class="loading"><div class="spinner"></div><span>Загружаем данные…</span></div></div>
+</div>
+<script>
+'use strict';
+const SHEET_ID      = '1POSNc2t9qv0HtnuCTIu0Htn9ZohqaBv7PWl3b-eoO8E';
+const TOTAL_ENROLLED = 87;
+
+function gvizUrl(sheet) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(sheet)}`;
+}
+async function fetchSheet(sheet) {
+  const r   = await fetch(gvizUrl(sheet));
+  const txt = await r.text();
+  const m   = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+  if (!m) throw new Error(`Не удалось загрузить лист «${sheet}»`);
+  return JSON.parse(m[1]).table.rows;
+}
+
+function strVal(c) { return (!c || c.v == null) ? '' : String(c.v).trim(); }
+function cellPct(c) {
+  if (!c || c.v == null) return null;
+  const v = c.v;
+  if (typeof v === 'number') return v <= 1 ? Math.round(v * 100) : Math.round(v);
+  const raw = String(c.f || v).replace('%','').replace(',','.').trim();
+  if (!raw || raw==='-' || raw==='Резерв' || raw.includes('VALUE') || raw==='-%-') return null;
+  const n = parseFloat(raw);
+  return isNaN(n) ? null : Math.round(n);
+}
+function avg(arr) {
+  const v = arr.filter(x => x !== null && !isNaN(x));
+  return v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : null;
+}
+function normLevel(raw) {
+  const l = (raw||'').toLowerCase();
+  if (l.includes('starter')) return 'Starters';
+  if (l.includes('mover'))   return 'Movers';
+  if (l.includes('flyer'))   return 'Flyers';
+  if (l.includes('key'))     return 'KEY';
+  if (l.includes('prelim') || l.includes('pet')) return 'PET';
+  return raw || '?';
+}
+function lvlCls(level) {
+  const l = (level||'').toLowerCase();
+  if (l.includes('starter')) return 'starters';
+  if (l.includes('mover'))   return 'movers';
+  if (l.includes('flyer'))   return 'flyers';
+  if (l.includes('key'))     return 'key';
+  if (l.includes('pet')||l.includes('prelim')) return 'pet';
+  return 'other';
+}
+function pctCol(v) {
+  if (v===null) return 'var(--text-hint)';
+  return v>=70 ? '#2BBFBF' : v>=50 ? '#D4850A' : '#5C1A3A';
+}
+function lvlBarColor(cls) {
+  const map = { starters:'#C88A20', movers:'#7D4EC0', flyers:'#2E8B2E', key:'#1B6CAF', pet:'#9A2060', other:'#888780' };
+  return map[cls] || map.other;
+}
+function lvlTextColor(cls) {
+  const map = { starters:'#9A5C00', movers:'#5A2080', flyers:'#1A6020', key:'#0A4A7A', pet:'#6A0040', other:'#7A6E6A' };
+  return map[cls] || map.other;
+}
+function sbRow(label, v, barCol) {
+  const col = barCol || 'var(--text-muted)';
+  return `<div class="sb-row">
+    <span class="sb-lbl">${label}</span>
+    <div class="sb-track"><div class="sb-fill" style="width:${v||0}%;background:${col}"></div></div>
+    <span class="sb-pct" style="color:${col}">${v!==null?v+'%':'—'}</span>
+  </div>`;
+}
+
+function parseRows(rows, isHigh) {
+  const out = [];
+  if (!rows) return out;
+  rows.forEach(row => {
+    if (!row.c) return;
+    const c = row.c;
+    const level = normLevel(strVal(c[0]));
+    const group = strVal(c[1]);
+    const name  = strVal(c[3]);
+    if (!name) return;
+    if (!isHigh) {
+      const lis   = cellPct(c[6]);
+      const rw    = cellPct(c[9]);
+      const spk   = cellPct(c[12]);
+      const total = cellPct(c[15]);
+      out.push({ level, group, name, listening:lis, rw, speaking:spk, total });
+    } else {
+      const lis   = cellPct(c[6]);
+      const read  = cellPct(c[9]);
+      const wrt   = cellPct(c[12]);
+      const spk   = cellPct(c[15]);
+      const total = cellPct(c[18]);
+      out.push({ level, group, name, listening:lis, rw:avg([read,wrt]), speaking:spk, total });
+    }
+  });
+  return out;
+}
+
+function computeLevel(students) {
+  const map = {};
+  students.forEach(s => { if(!map[s.level]) map[s.level]=[]; map[s.level].push(s); });
+  const ORDER = ['Starters','Movers','Flyers','KEY','PET'];
+  return Object.entries(map)
+    .sort((a,b)=>{const ia=ORDER.indexOf(a[0]),ib=ORDER.indexOf(b[0]); return (ia<0?99:ia)-(ib<0?99:ib);})
+    .map(([level,ss])=>{
+      const done = ss.filter(s=>s.total!==null);
+      const pass = done.filter(s=>s.total>=70);
+      // навыки считаем только по завершившим тест — иначе Speaking занижен из-за Резерв
+      const lis  = avg(done.map(s=>s.listening).filter(v=>v!==null));
+      const rw   = avg(done.map(s=>s.rw).filter(v=>v!==null));
+      const spk  = avg(done.map(s=>s.speaking).filter(v=>v!==null));
+      const skills = [['Listening',lis],['Reading & Writing',rw],['Speaking',spk]];
+      const weak = skills.filter(([,v])=>v!==null).sort((a,b)=>a[1]-b[1])[0];
+      return { level, count:ss.length, wrote:done.length,
+        avg:avg(done.map(s=>s.total)), passing:pass.length,
+        passRate:done.length?Math.round(pass.length/done.length*100):0,
+        lis, rw, spk, weak };
+    });
+}
+
+function computeGroups(students) {
+  const map = {};
+  students.forEach(s=>{
+    const key = s.level+'|||'+s.group;
+    if(!map[key]) map[key]={level:s.level, group:s.group, ss:[]};
+    map[key].ss.push(s);
+  });
+  return Object.values(map);
+}
+
+function generateInsights(students, lvlStats) {
+  const insights = [];
+  const done = students.filter(s=>s.total!==null);
+
+  // Best / worst level
+  const ranked = lvlStats.filter(l=>l.avg!==null).sort((a,b)=>b.avg-a.avg);
+  if (ranked.length>=2) {
+    insights.push(`Лучший средний результат — <b>${ranked[0].level}</b>: ${ranked[0].avg}%`);
+    insights.push(`Сложнее всего дался тест — <b>${ranked[ranked.length-1].level}</b>: ${ranked[ranked.length-1].avg}%`);
+  }
+
+  // Weakest skill overall
+  const allLis = avg(done.map(s=>s.listening).filter(v=>v!==null));
+  const allRW  = avg(done.map(s=>s.rw).filter(v=>v!==null));
+  const allSpk = avg(done.map(s=>s.speaking).filter(v=>v!==null));
+  const skills = [['Listening',allLis],['Reading & Writing',allRW],['Speaking',allSpk]];
+  const weakSkill = skills.filter(([,v])=>v!==null).sort((a,b)=>a[1]-b[1])[0];
+  if (weakSkill) insights.push(`Самый слабый навык по всей школе — <b>${weakSkill[0]}</b>: средний ${weakSkill[1]}%`);
+
+  // Навыки по каждому уровню
+  lvlStats.forEach(l=>{
+    if(l.weak && l.weak[1]!==null)
+      insights.push(`<b>${l.level}</b> — сложнее всего дается <b>${l.weak[0]}</b>: средний ${l.weak[1]}%`);
+  });
+
+  return insights;
+}
+
+function render(students) {
+  const lvlStats = computeLevel(students);
+  const groups   = computeGroups(students);
+  const done     = students.filter(s=>s.total!==null);
+  const passing  = done.filter(s=>s.total>=70);
+  const insights = generateInsights(students, lvlStats); // kept for legacy; not rendered
+  const ranked = lvlStats.filter(l=>l.avg!==null).sort((a,b)=>b.avg-a.avg);
+  const bestLvl  = ranked[0];
+  const worstLvl = ranked.length>1 ? ranked[ranked.length-1] : null;
+  const allLis = avg(done.map(s=>s.listening).filter(v=>v!==null));
+  const allRW  = avg(done.map(s=>s.rw).filter(v=>v!==null));
+  const allSpk = avg(done.map(s=>s.speaking).filter(v=>v!==null));
+  const weakSchool = [['Listening',allLis],['R&W',allRW],['Speaking',allSpk]]
+    .filter(([,v])=>v!==null).sort((a,b)=>a[1]-b[1])[0];
+  const now = new Date().toLocaleString('ru-RU',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // Group by level for rendering
+  const ORDER = ['Starters','Movers','Flyers','KEY','PET'];
+  const byLevelGroups = {};
+  groups.forEach(g => {
+    if(!byLevelGroups[g.level]) byLevelGroups[g.level]=[];
+    byLevelGroups[g.level].push(g);
+  });
+
+  document.getElementById('app').innerHTML = `
+
+  <!-- HEADER -->
+  <div class="rpt-header">
+    <div>
+      <div class="rpt-title">Тестирование · Весна 2026</div>
+      <div class="rpt-sub">AB Road Studio · для преподавателей</div>
+    </div>
+    <div class="rpt-meta">${now}</div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="section">
+    <div class="section-title">Общая сводка</div>
+    <div class="sum-grid">
+      <div class="sum-card">
+        <div class="sum-lbl">Написали тест</div>
+        <div class="sum-val">${done.length}<span class="u"> / ${TOTAL_ENROLLED}</span></div>
+        <div class="sum-note">детей</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-lbl">Результат 70% и выше</div>
+        <div class="sum-val" style="color:var(--teal)">${passing.length}<span class="u"> / ${done.length}</span></div>
+        <div class="sum-note">${done.length?Math.round(passing.length/done.length*100):0}% написавших тест</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КРАТКАЯ СВОДКА -->
+  <div class="svod-box">
+    <div class="svod-title">Краткая сводка по тестированию</div>
+    <div class="svod-tiles">
+      ${bestLvl ? `<div class="svod-tile">
+        <div class="svod-tile-lbl">Лучший результат</div>
+        <div class="svod-tile-main">${bestLvl.level}</div>
+        <div class="svod-tile-sub">средний ${bestLvl.avg}% · прошли ${bestLvl.passRate}%</div>
+      </div>` : ''}
+      ${worstLvl ? `<div class="svod-tile">
+        <div class="svod-tile-lbl">Сложнее всего дался тест</div>
+        <div class="svod-tile-main">${worstLvl.level}</div>
+        <div class="svod-tile-sub">средний ${worstLvl.avg}% · прошли ${worstLvl.passRate}%</div>
+      </div>` : ''}
+      ${weakSchool ? `<div class="svod-tile">
+        <div class="svod-tile-lbl">Слабый навык по школе</div>
+        <div class="svod-tile-main">${weakSchool[0]}</div>
+        <div class="svod-tile-sub">средний по всем уровням ${weakSchool[1]}%</div>
+      </div>` : ''}
+    </div>
+    <div class="svod-divider"></div>
+    <div style="font-family:var(--font-head);font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:12px">Что труднее всего даётся по уровням</div>
+    <div class="svod-skills">
+      ${lvlStats.filter(l=>l.weak&&l.weak[1]!==null).map(l=>`
+        <div class="svod-skill-tag">
+          <div class="svod-skill-lvl">${l.level}</div>
+          <div class="svod-skill-name">↓ ${l.weak[0]}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- BY LEVEL -->
+  <div class="section">
+    <div class="section-title">По уровням</div>
+
+    ${(()=>{
+      function renderCard(l) {
+        const cls = lvlCls(l.level);
+        const barCol = lvlBarColor(cls);
+        const txtCol = lvlTextColor(cls);
+        return `<div class="level-card">
+          <div class="level-tag lc-${cls}">${l.level}</div>
+          <div class="lc-dual">
+            <div class="lc-mini">
+              <div class="lc-mini-v" style="color:${txtCol}">${l.wrote}</div>
+              <div class="lc-mini-l">писали<br>тест</div>
+            </div>
+            <div class="lc-mini">
+              <div class="lc-mini-v" style="color:${txtCol}">${l.passRate}%</div>
+              <div class="lc-mini-l">прошли<br>70%+</div>
+            </div>
+          </div>
+          <div class="bars-title">% выполнения по навыку</div>
+          <div class="skill-bars">
+            ${sbRow('Listening',l.lis,barCol)}
+            ${sbRow('R&W',l.rw,barCol)}
+            ${sbRow('Speaking',l.spk,barCol)}
+          </div>
+          ${l.weak && l.weak[1]!==null ? `<div class="weak-tag">Труднее всего даётся: ${l.weak[0]}</div>` : ''}
+        </div>`;
+      }
+      return `<div class="level-grid">${lvlStats.map(renderCard).join('')}</div>`;
+    })()}
+  </div>
+
+  <!-- BY GROUP -->
+  <div class="section">
+    <div class="section-title">Анализ по группам</div>
+    ${ORDER.filter(lv => byLevelGroups[lv]).map(lv => {
+      const cls = lvlCls(lv);
+      return `
+      <div class="level-group-section">
+        <div class="lgs-header">
+          <span class="lgs-tag lc-${cls}">${lv}</span>
+          <div class="lgs-line"></div>
+        </div>
+        <div class="group-cards">
+          ${byLevelGroups[lv].map(g => {
+            const done2 = g.ss.filter(s=>s.total!==null);
+            const pass  = done2.filter(s=>s.total>=70).sort((a,b)=>b.total-a.total);
+            const low   = done2.filter(s=>s.total<40).sort((a,b)=>a.total-b.total);
+
+            function weakSkillLabel(s) {
+              const sk=[['Listening',s.listening],['R&W',s.rw],['Speaking',s.speaking]];
+              const w=sk.filter(([,v])=>v!==null).sort((a,b)=>a[1]-b[1])[0];
+              return w ? w[0] : null;
+            }
+
+            const passZone = pass.length>0 ? `
+              <div class="gc-zone z-pass">
+                <div class="gz-header">
+                  <div class="gz-dot pass"></div>
+                  <span class="gz-lbl pass">70% и выше</span>
+                  <span class="gz-cnt">${pass.length} ${pass.length===1?'ребёнок':'детей'}</span>
+                </div>
+                ${pass.map(s=>`<div class="stu-row">
+                  <span class="stu-name">${s.name}</span>
+                  <span class="stu-score pass">${s.total}%</span>
+                </div>`).join('')}
+              </div>` : `<div class="gc-zone z-pass" style="background:rgba(43,191,191,.03)">
+                <div class="gz-header">
+                  <div class="gz-dot pass"></div>
+                  <span class="gz-lbl pass">70% и выше</span>
+                </div>
+                <div class="gc-none">никто не преодолел порог</div>
+              </div>`;
+
+            const lowZone = low.length>0 ? `
+              <div class="gc-zone z-low">
+                <div class="gz-header">
+                  <div class="gz-dot low"></div>
+                  <span class="gz-lbl low">менее 40%</span>
+                  <span class="gz-cnt">${low.length} ${low.length===1?'ребёнок':'детей'}</span>
+                </div>
+                ${low.map(s=>{const w=weakSkillLabel(s); return `<div class="stu-row">
+                  <span class="stu-name">${s.name}</span>
+                  <span class="stu-score low">${s.total??'—'}%</span>
+                  ${w?`<span class="stu-skill">↓ ${w}</span>`:''}
+                </div>`;}).join('')}
+              </div>` : '';
+
+            return `
+            <div class="group-card">
+              <div class="gc-head lc-${cls}">
+                <div class="gc-name tc-${cls}">${g.group}</div>
+                <div class="gc-count">${done2.length} человек писали тест</div>
+              </div>
+              ${passZone}
+              ${lowZone}
+              ${done2.length===0?'<div class="gc-zone z-empty"><div class="gc-none">нет данных</div></div>':''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+(async () => {
+  try {
+    const [r1,r2] = await Promise.all([fetchSheet('Data'),fetchSheet('Data_high')]);
+
+    // ── ДИАГНОСТИКА: показываем первые 3 строки каждого листа ──
+    console.group('📊 AB Road · Диагностика данных');
+    function logRow(row, label) {
+      if (!row || !row.c) return;
+      const vals = row.c.map((cell,i)=>`[${i}] ${cell ? (cell.f||cell.v) : 'null'}`);
+      console.log(label, vals.join(' | '));
+    }
+    console.group('Лист Data (первые 3 строки)');
+    r1.slice(0,3).forEach((r,i)=>logRow(r, `Строка ${i+1}:`));
+    console.groupEnd();
+    console.group('Лист Data_high (первые 3 строки)');
+    r2.slice(0,3).forEach((r,i)=>logRow(r, `Строка ${i+1}:`));
+    console.groupEnd();
+
+    const allStudents = [...parseRows(r1,false),...parseRows(r2,true)];
+
+    // Логируем посчитанные значения
+    const lvlStats = computeLevel(allStudents);
+    console.group('Посчитанные средние по уровням:');
+    lvlStats.forEach(l => console.log(
+      `${l.level}: wrote=${l.wrote} avg=${l.avg}% | Lis=${l.lis}% RW=${l.rw}% Spk=${l.spk}% | pass=${l.passing}/${l.wrote}`
+    ));
+    console.groupEnd();
+
+    const done = allStudents.filter(s=>s.total!==null);
+    const allLis = avg(done.map(s=>s.listening).filter(v=>v!==null));
+    const allRW  = avg(done.map(s=>s.rw).filter(v=>v!==null));
+    const allSpk = avg(done.map(s=>s.speaking).filter(v=>v!==null));
+    console.log(`Школа в целом: Lis=${allLis}% RW=${allRW}% Spk=${allSpk}%`);
+    console.groupEnd();
+
+    render(allStudents);
+  } catch(e) {
+    document.getElementById('app').innerHTML=`
+      <div class="loading" style="color:var(--bordeaux)">
+        <div style="font-size:14px;font-weight:700">Ошибка загрузки</div>
+        <div style="font-size:11px;color:var(--text-hint)">${e.message}</div>
+        <div style="font-size:11px;color:var(--text-hint);margin-top:4px">Открывай с веб-сервера, не через file://</div>
+      </div>`;
+  }
+})();
+</script>
+</body>
+</html>
