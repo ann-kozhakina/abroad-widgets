@@ -30,6 +30,13 @@ body{font-family:var(--font-body);font-size:14px;background:var(--bg);color:var(
 }
 .mtab:hover{color:var(--text-sec);}
 .mtab.active{color:var(--text);border-bottom-color:var(--bordeaux);font-weight:700;}
+.month-bar{align-items:center;}
+.toggle-all{
+  margin-left:auto;padding:6px 14px;border:1px solid var(--border);border-radius:6px;
+  background:var(--white);font-family:var(--font-body);font-size:11px;font-weight:600;
+  color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all 0.15s;
+}
+.toggle-all:hover{color:var(--text);border-color:var(--text-hint);}
 
 .main{max-width:1500px;margin:0 auto;padding:24px 24px 60px;}
 
@@ -180,7 +187,8 @@ function visibleMonths(){
   if(cm>=9)curIdx=cm-9;
   else if(cm<=5)curIdx=cm+3;
   else curIdx=0;
-  return monthCols.map(mc=>mc.name).filter((_,i)=>i<=curIdx);
+  const showNext=new Date().getDate()>=28?1:0;
+  return monthCols.map(mc=>mc.name).filter((_,i)=>i<=curIdx+showNext);
 }
 
 function teacherCss(t){
@@ -200,7 +208,7 @@ function render(){
   document.getElementById('updated').innerHTML=updatedAt?`Данные актуальны на ${esc(updatedAt)}`:'';
   document.getElementById('months').innerHTML=months.map(m=>
     `<button class="mtab${m===selMonth?' active':''}" onclick="selMonth='${m}';render()">${m}</button>`
-  ).join('');
+  ).join('')+'<button class="toggle-all" onclick="toggleAll()">Развернуть все</button>';
 
   if(!students.length){document.getElementById('content').innerHTML='<div class="loading">Нет данных</div>';return;}
 
@@ -257,6 +265,14 @@ document.getElementById('content').addEventListener('click',function(e){
   if(!head)return;
   head.parentElement.classList.toggle('collapsed');
 });
+
+function toggleAll(){
+  const blocks=document.querySelectorAll('.g-block');
+  const allExpanded=[...blocks].every(b=>!b.classList.contains('collapsed'));
+  blocks.forEach(b=>allExpanded?b.classList.add('collapsed'):b.classList.remove('collapsed'));
+  const btn=document.querySelector('.toggle-all');
+  if(btn)btn.textContent=allExpanded?'Развернуть все':'Свернуть все';
+}
 
 async function loadData(){
   try{
