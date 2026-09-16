@@ -264,14 +264,22 @@ document.getElementById('content').addEventListener('click',function(e){
   const head=e.target.closest('.g-head');
   if(!head)return;
   head.parentElement.classList.toggle('collapsed');
+  updateToggleBtn();
 });
+
+function updateToggleBtn(){
+  const btn=document.querySelector('.toggle-all');
+  if(!btn)return;
+  const blocks=document.querySelectorAll('.g-block');
+  const anyExpanded=[...blocks].some(b=>!b.classList.contains('collapsed'));
+  btn.textContent=anyExpanded?'Свернуть все':'Развернуть все';
+}
 
 function toggleAll(){
   const blocks=document.querySelectorAll('.g-block');
-  const allExpanded=[...blocks].every(b=>!b.classList.contains('collapsed'));
-  blocks.forEach(b=>allExpanded?b.classList.add('collapsed'):b.classList.remove('collapsed'));
-  const btn=document.querySelector('.toggle-all');
-  if(btn)btn.textContent=allExpanded?'Развернуть все':'Свернуть все';
+  const anyExpanded=[...blocks].some(b=>!b.classList.contains('collapsed'));
+  blocks.forEach(b=>anyExpanded?b.classList.add('collapsed'):b.classList.remove('collapsed'));
+  updateToggleBtn();
 }
 
 async function loadData(){
