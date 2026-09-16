@@ -106,7 +106,7 @@ const TOTAL_SHEET='Total';
 const MONTHS_ALL=['Сентябрь','Октябрь','Ноябрь','Декабрь','Январь','Февраль','Март','Апрель','Май'];
 const TEACHER_ORDER=['ek','an','na'];
 
-let students=[],monthCols=[],groupTeacher={},selMonth=null,updatedAt='';
+let students=[],monthCols=[],groupTeacher={},studentTeacher={},selMonth=null,updatedAt='';
 
 function gvizUrl(id,name){
   return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name);
@@ -123,13 +123,16 @@ async function fetchSheet(id,name){
 
 function parseTotal(json){
   const hdr=json.table.cols.map(c=>(c.label||'').trim());
+  const iN=hdr.findIndex(h=>/студент/i.test(h));
   const iG=hdr.findIndex(h=>/группа/i.test(h));
   const iT=hdr.findIndex(h=>/учитель|преподаватель/i.test(h));
   if(iG<0||iT<0)return;
   groupTeacher={};
+  studentTeacher={};
   for(const row of json.table.rows){
     const cv=(i)=>{if(i<0||!row.c?.[i])return'';const c=row.c[i];return(c.f||(c.v!=null?String(c.v):'')).trim();};
-    const g=cv(iG),t=cv(iT);
+    const n=iN>=0?cv(iN):'',g=cv(iG),t=cv(iT);
+    if(n&&t)studentTeacher[n]=t;
     if(g&&t&&!groupTeacher[g])groupTeacher[g]=t;
   }
 }
@@ -159,7 +162,7 @@ function parsePayments(json){
     const name=cv(iN);
     if(!name)continue;
     const group=cv(iG);
-    const teacher=groupTeacher[group]||'';
+    const teacher=studentTeacher[name]||groupTeacher[group]||'';
     const s={name,group,teacher,months:{}};
     for(const mc of monthCols){
       const pv=mc.iPaid>=0?cv(mc.iPaid):'';
