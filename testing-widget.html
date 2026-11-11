@@ -172,7 +172,16 @@
 .lw-spinner { width: 18px; height: 18px; border: 2px solid var(--bg2); border-top-color: var(--teal); border-radius: 50%; animation: spin .75s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.live-widget-wrap{padding:0;border:0}.lw-empty{grid-column:1/-1}@media(max-width:700px){.live-widget-wrap{padding:0}}</style></head><body>
+.live-widget-wrap{padding:0;border:0}.lw-empty{grid-column:1/-1}@media(max-width:700px){.live-widget-wrap{padding:0}}/* compact-notion-v2 */
+.lw-grid{grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start}
+.lw-left{padding:16px 10px;border-radius:14px}.lw-live-row{margin-bottom:14px;gap:5px}.lw-upd-txt{font-size:9px}
+.lw-ring-wrap{width:120px;height:120px;margin-bottom:12px}.lw-ring-svg{width:120px;height:120px}.lw-ring-num{font-size:32px}.lw-ring-denom{font-size:12px}.lw-ring-caption{font-size:9px;line-height:1.6}
+.lw-right{min-width:0;padding:16px;border-radius:14px}.compact-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:16px}.compact-controls>.lw-filter-label{width:100%;margin-bottom:0}.lw-filter-btns{width:auto;flex:1;margin:0;gap:4px}.lw-fbtn{padding:5px 6px;font-size:7px}.compact-result{border-left:1px solid var(--border);padding-left:12px;min-width:110px}.compact-result .lw-filter-label{margin-bottom:6px}.lw-result-val{font-size:11px;line-height:1.5}
+.lw-board-head{gap:8px;margin-bottom:10px}.lw-board-title{font-size:8px;letter-spacing:.06em}.lw-board-tag{font-size:9px;white-space:nowrap}
+.lw-list{display:flex;flex-direction:column;gap:4px;max-height:350px;overflow-y:auto}.lw-item{display:grid;grid-template-columns:54px minmax(0,1fr);gap:3px 8px;padding:8px 10px;border-radius:7px}.lw-card-top{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;justify-content:center;gap:4px;margin:0}.lw-medal{font-size:13px}.lw-num{font-size:8px;min-width:0}.lw-score{font-size:15px}.lw-score .u{font-size:9px}.lw-name{grid-column:2;align-self:end;font-size:10px}.lw-tags{grid-column:2;margin:0}.lw-group{font-size:9px}.lw-lvl{font-size:7px}.lw-empty{padding:20px 8px}
+@media(max-width:440px){.lw-grid{grid-template-columns:110px minmax(0,1fr);gap:8px}.lw-left{padding:12px 5px}.lw-ring-wrap,.lw-ring-svg{width:94px;height:94px}.lw-ring-num{font-size:26px}.lw-right{padding:12px 9px}.lw-upd-txt{font-size:8px}.compact-result{border-left:0;padding-left:0}.lw-board-tag{display:none}.lw-ring-caption{font-size:8px}}
+@media(max-width:300px){.lw-grid{grid-template-columns:1fr}.lw-left{flex-direction:row;justify-content:center;gap:8px;flex-wrap:wrap}.lw-live-row{margin:0}.lw-ring-wrap{margin:0}}
+</style></head><body>
   <!-- ── LIVE TESTING WIDGET ── -->
   <div class="live-widget-wrap" style="--delay:0.04s">
     <div class="lw-grid">
@@ -201,8 +210,11 @@
         </div>
         <div class="lw-ring-caption" id="lw-caption">—% сдали тест</div>
 
-        <div class="lw-divider"></div>
-        <div class="lw-filter-label">уровень</div>
+      </div>
+
+      <!-- список -->
+      <div class="lw-right">
+<div class="compact-controls"><div class="lw-filter-label">уровень</div>
         <div class="lw-filter-btns">
           <button class="lw-fbtn f-all active" data-lvl="all">Все</button>
           <button class="lw-fbtn f-ls" data-lvl="ls">Starters</button>
@@ -211,13 +223,7 @@
           <button class="lw-fbtn f-lk" data-lvl="lk">KEY</button>
           <button class="lw-fbtn f-lp" data-lvl="lp">PET</button>
         </div>
-        <div class="lw-divider"></div>
-        <div class="lw-filter-label">Результат ≥70%</div>
-        <div class="lw-result-val" id="lw-filter-count">—</div>
-      </div>
-
-      <!-- список -->
-      <div class="lw-right">
+<div class="compact-result"><div class="lw-filter-label">Набрали ≥70%</div><div class="lw-result-val" id="lw-filter-count">—</div></div></div>
         <div class="lw-board-head">
           <div class="lw-board-title" id="lw-board-title">Топ-30 · результат ≥ 70%</div>
           <div class="lw-board-tag">Осень 2026</div>
@@ -317,6 +323,7 @@
   // ── фильтр ──
   const activeFilters  = new Set();
   let   lwWroteTotal   = 0;
+  let lwPassed = [];
   const lwWroteByLevel = {};
   const LVL_NAMES = { ls:'Starters', lm:'Movers', lf:'Flyers', lk:'KEY', lp:'PET' };
 
@@ -343,6 +350,7 @@
       if (title) title.textContent = sel + ' · результат ≥ 70%';
     }
 
+    visible = lwPassed.filter(s => activeFilters.size === 0 || activeFilters.has(lwLvlClass(s.level).replace('lw-', ''))).length;
     const sharePct = wroteTotal > 0 ? Math.round(visible / wroteTotal * 100) : 0;
     if (counter) counter.innerHTML =
       `${visible} из ${wroteTotal}, <span class="lw-result-pct">${sharePct}%</span>`;
@@ -398,6 +406,7 @@
         lwWroteByLevel[key] = (lwWroteByLevel[key] || 0) + 1;
       });
 
+      lwPassed = completed.filter(s => s.pct >= 70);
       // карточки топ-30
       const MEDALS = ['🥇','🥈','🥉'];
       const top30  = students
