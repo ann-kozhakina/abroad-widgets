@@ -1,513 +1,438 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Прогресс тестирования — AB Road</title>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bordeaux: #5C1A3A;
-  --teal: #2BBFBF;
-  --bg: #FDFCFA;
-  --bg2: #F5F3EF;
-  --white: #FFFFFF;
-  --text: #1A1219;
-  --text-muted: #9A8A95;
-  --text-hint: #C4B4BF;
-  --border: rgba(26,18,25,0.08);
-  --font-head: 'Unbounded', sans-serif;
-  --font-body: 'Mulish', sans-serif;
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Прогресс тестирования — AB Road</title><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Mulish:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0} :root{--bordeaux:#5C1A3A;--teal:#2BBFBF;--bg:transparent;--bg2:#F5F3EF;--white:#FFFFFF;--text:#1A1219;--text-muted:#9A8A95;--text-hint:#C4B4BF;--border:rgba(26,18,25,.08);--font-head:'Unbounded',sans-serif;--font-body:'Mulish',sans-serif} body{font-family:var(--font-body);color:var(--text);background:transparent}
+/* ── LIVE TESTING WIDGET ── */
+.live-widget-wrap {
+  padding: 28px 48px 32px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg);
+}
+@media (max-width: 700px) { .live-widget-wrap { padding: 20px 20px 24px; } }
+
+.lw-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+}
+@media (max-width: 800px) { .lw-grid { grid-template-columns: 1fr; } }
+
+/* левая — кольцо */
+.lw-left {
+  background: var(--white); border: 0.5px solid var(--border);
+  border-radius: 18px; padding: 24px 20px 22px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.lw-live-row {
+  display: flex; align-items: center; gap: 7px;
+  align-self: flex-start; width: 100%; margin-bottom: 22px;
+}
+.lw-pulse {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--teal); flex-shrink: 0;
+  animation: lwBlink 2.4s ease-in-out infinite;
+}
+@keyframes lwBlink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.lw-upd-txt { font-size: 10px; color: var(--text-hint); }
+
+.lw-ring-wrap {
+  position: relative; width: 180px; height: 180px; margin-bottom: 16px;
+}
+.lw-ring-svg { transform: rotate(-90deg); display: block; }
+.lw-ring-track { fill: none; stroke: var(--bg2); stroke-width: 14; }
+.lw-ring-fill {
+  fill: none; stroke-width: 14; stroke-linecap: round;
+  stroke: url(#lwGrad);
+  stroke-dasharray: 502;
+  stroke-dashoffset: 502;
+  transition: stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1);
+}
+.lw-ring-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+}
+.lw-ring-num {
+  font-family: var(--font-head); font-size: 46px; font-weight: 700;
+  color: var(--bordeaux); line-height: 1; letter-spacing: -.02em;
+}
+.lw-ring-denom {
+  font-family: var(--font-head); font-size: 14px; font-weight: 400;
+  color: var(--text-hint); margin-top: 2px;
+}
+.lw-ring-caption {
+  font-family: var(--font-head); font-size: 11px; font-weight: 700;
+  color: var(--bordeaux); text-align: center;
 }
 
-body {
-  font-family: var(--font-body);
-  background: transparent;
-  color: var(--text);
-  padding: 0;
+/* правая — список */
+.lw-right {
+  background: var(--white); border: 0.5px solid var(--border);
+  border-radius: 18px; padding: 22px 24px;
 }
-
-/* ─── PROGRESS CARD ─── */
-.progress-card {
-  background: var(--white);
-  border: 0.5px solid var(--border);
-  border-radius: 14px;
-  padding: 24px 28px 20px;
-  margin-bottom: 16px;
+.lw-board-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
 }
-
-.progress-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 18px;
-  gap: 12px;
+.lw-board-title {
+  font-family: var(--font-head); font-size: 9px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text-hint);
 }
-
-.progress-left {}
-
-.progress-eyebrow {
-  font-family: var(--font-head);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-hint);
-  margin-bottom: 8px;
+.lw-board-tag {
+  font-size: 10px; color: var(--teal); font-weight: 700;
+  background: rgba(43,191,191,.1); border-radius: 20px; padding: 3px 10px;
 }
-
-.progress-numbers {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  line-height: 1;
+/* карточки — сетка */
+.lw-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
-
-.progress-count {
-  font-family: var(--font-head);
-  font-size: 44px;
-  font-weight: 700;
-  color: var(--bordeaux);
-  letter-spacing: -0.02em;
+@media (max-width: 900px) { .lw-list { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .lw-list { grid-template-columns: repeat(2, 1fr); } }
+.lw-item {
+  display: flex; flex-direction: column; gap: 6px;
+  background: rgba(43,191,191,.07);
+  border: 0.5px solid transparent; border-radius: 12px; padding: 12px 14px;
+  transition: background .12s, border-color .12s;
 }
-
-.progress-of {
-  font-family: var(--font-head);
-  font-size: 18px;
-  font-weight: 400;
-  color: var(--text-hint);
+.lw-item:hover { background: rgba(43,191,191,.13); border-color: rgba(43,191,191,.3); }
+.lw-item.hidden { display: none; }
+/* верхняя строка карточки: ранг + счёт */
+.lw-card-top {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;
 }
-
-.progress-label-right {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 4px;
+.lw-medal { font-size: 18px; line-height: 1; }
+.lw-num {
+  font-family: var(--font-head); font-size: 11px; font-weight: 700;
+  color: var(--text-hint); min-width: 20px;
 }
-
-.pct-badge {
-  background: rgba(43,191,191,0.1);
-  border: 0.5px solid rgba(43,191,191,0.25);
-  color: var(--teal);
-  font-family: var(--font-head);
-  font-size: 16px;
-  font-weight: 700;
-  padding: 10px 18px;
-  border-radius: 12px;
-  flex-shrink: 0;
-  align-self: flex-start;
-  letter-spacing: -0.01em;
+.lw-score {
+  font-family: var(--font-head); font-size: 20px; font-weight: 700;
+  color: var(--bordeaux); line-height: 1; letter-spacing: -.02em;
 }
-
-.progress-bar-wrap {
-  margin-bottom: 10px;
+.lw-score .u { font-size: 11px; font-weight: 400; opacity: .45; }
+/* имя */
+.lw-name {
+  font-family: var(--font-head); font-size: 11px; font-weight: 700;
+  color: var(--text); line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-
-.bar-track {
-  height: 6px;
-  background: var(--bg2);
-  border-radius: 100px;
-  overflow: hidden;
+/* бейджи */
+.lw-tags { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
+.lw-lvl {
+  display: inline-flex; font-size: 8px; font-weight: 700;
+  font-family: var(--font-head); padding: 2px 6px; border-radius: 4px;
+  letter-spacing: .04em; text-transform: uppercase; flex-shrink: 0;
 }
+.lw-ls { background: rgba(212,133,10,.12); color: #9A5C00; }
+.lw-lm { background: rgba(107,53,168,.10); color: #5A2080; }
+.lw-lf { background: rgba(42,122,42,.10);  color: #1A6020; }
+.lw-lk { background: rgba(26,106,154,.12); color: #0A4A7A; }
+.lw-lp { background: rgba(139,31,90,.10);  color: #6A0040; }
+.lw-lo { background: var(--bg2); color: var(--text-muted); }
+.lw-group { font-size: 10px; color: var(--text-muted); }
 
-.bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--bordeaux) 0%, var(--teal) 100%);
-  border-radius: 100px;
-  transition: width 1s cubic-bezier(.4,0,.2,1);
-  min-width: 2px;
+/* ── фильтры под кольцом ── */
+.lw-divider { width: 100%; height: 0.5px; background: var(--border); margin: 18px 0 14px; }
+.lw-filter-label {
+  font-family: var(--font-head); font-size: 8px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-hint); margin-bottom: 8px; align-self: flex-start;
 }
-
-.progress-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--text-hint);
+.lw-filter-btns { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; margin-bottom: 10px; }
+.lw-fbtn {
+  font-family: var(--font-head); font-size: 8px; font-weight: 700;
+  letter-spacing: .03em; text-transform: uppercase;
+  border: 1.5px solid transparent; border-radius: 6px;
+  padding: 5px 9px; cursor: pointer; line-height: 1;
+  transition: all .15s; opacity: .45; background: transparent;
 }
-
-/* ─── LEADERBOARD ─── */
-.section-eyebrow {
-  font-family: var(--font-head);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-hint);
-  margin-bottom: 10px;
+.lw-fbtn:hover { opacity: .75; }
+.lw-fbtn.active { opacity: 1; }
+.lw-fbtn.f-all              { color: var(--teal); border-color: rgba(43,191,191,.35); opacity: 1; }
+.lw-fbtn.f-all.active       { background: rgba(43,191,191,.15); border-color: var(--teal); }
+.lw-fbtn.f-ls               { color: #9A5C00; border-color: rgba(212,133,10,.3); }
+.lw-fbtn.f-ls.active        { background: rgba(212,133,10,.15); border-color: #D4850A; opacity: 1; }
+.lw-fbtn.f-lm               { color: #5A2080; border-color: rgba(107,53,168,.3); }
+.lw-fbtn.f-lm.active        { background: rgba(107,53,168,.15); border-color: #6B35A8; opacity: 1; }
+.lw-fbtn.f-lf               { color: #1A6020; border-color: rgba(42,122,42,.3); }
+.lw-fbtn.f-lf.active        { background: rgba(42,122,42,.15); border-color: #2A7A2A; opacity: 1; }
+.lw-fbtn.f-lk               { color: #0A4A7A; border-color: rgba(26,106,154,.3); }
+.lw-fbtn.f-lk.active        { background: rgba(26,106,154,.15); border-color: #1A6A9A; opacity: 1; }
+.lw-fbtn.f-lp               { color: #6A0040; border-color: rgba(139,31,90,.3); }
+.lw-fbtn.f-lp.active        { background: rgba(139,31,90,.15); border-color: #8B1F5A; opacity: 1; }
+/* счётчик результата */
+.lw-result-val {
+  font-family: var(--font-head); font-size: 12px; font-weight: 700;
+  color: var(--text); align-self: flex-start; line-height: 1;
 }
+.lw-result-pct { color: var(--bordeaux); }
 
-.leaderboard {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.leader-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--white);
-  border: 0.5px solid var(--border);
-  border-radius: 10px;
-  padding: 11px 14px;
-  transition: border-color 0.15s, transform 0.1s;
-}
-
-.leader-row:hover {
-  border-color: rgba(43,191,191,0.3);
-  transform: translateX(2px);
-}
-
-.leader-row.top-1 { border-left: 2.5px solid #D4970A; }
-.leader-row.top-2 { border-left: 2.5px solid #9E9E9E; }
-.leader-row.top-3 { border-left: 2.5px solid #B87333; }
-
-.rank-icon {
-  font-size: 16px;
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.rank-num {
-  font-family: var(--font-head);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-hint);
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.leader-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.leader-name {
-  font-family: var(--font-head);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-
-.leader-meta {
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-.leader-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.mini-bar {
-  width: 52px;
-  height: 3px;
-  background: var(--bg2);
-  border-radius: 100px;
-  overflow: hidden;
-}
-
-.mini-bar-fill {
-  height: 100%;
-  border-radius: 100px;
-}
-
-.fill-gold   { background: linear-gradient(90deg, #D4970A, #F5C842); }
-.fill-silver { background: linear-gradient(90deg, #9E9E9E, #CFCFCF); }
-.fill-bronze { background: linear-gradient(90deg, #B87333, #D4956A); }
-.fill-default { background: linear-gradient(90deg, var(--bordeaux), var(--teal)); }
-
-.score-badge {
-  font-family: var(--font-head);
-  font-size: 13px;
-  font-weight: 700;
-  min-width: 40px;
-  text-align: right;
-}
-
-.score-gold   { color: #C68400; }
-.score-silver { color: #7A7A7A; }
-.score-bronze { color: #9B5C1A; }
-.score-default { color: var(--bordeaux); }
-
-/* ─── STATES ─── */
-.empty-msg {
-  text-align: center;
-  padding: 24px 16px;
-  color: var(--text-hint);
-  font-size: 12px;
-  font-style: italic;
-  background: var(--white);
-  border: 0.5px solid var(--border);
-  border-radius: 10px;
-}
-
-.loading-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 40px 20px;
-  color: var(--text-hint);
-  font-size: 12px;
-}
-
-.spinner {
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--bg2);
-  border-top-color: var(--teal);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-}
-
+.lw-empty { text-align: center; padding: 28px 12px; font-size: 11px; color: var(--text-hint); font-style: italic; }
+.lw-loading { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px; color: var(--text-hint); font-size: 11px; }
+.lw-spinner { width: 18px; height: 18px; border: 2px solid var(--bg2); border-top-color: var(--teal); border-radius: 50%; animation: spin .75s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── FOOTER ─── */
-.widget-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: 12px;
-}
+.live-widget-wrap{padding:0;border:0}.lw-empty{grid-column:1/-1}@media(max-width:700px){.live-widget-wrap{padding:0}}</style></head><body>
+  <!-- ── LIVE TESTING WIDGET ── -->
+  <div class="live-widget-wrap" style="--delay:0.04s">
+    <div class="lw-grid">
 
-.live-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--teal);
-  animation: blink 2.4s ease-in-out infinite;
-}
+      <!-- кольцо -->
+      <div class="lw-left">
+        <div class="lw-live-row">
+          <div class="lw-pulse"></div>
+          <div class="lw-upd-txt" id="lw-upd">обновляется…</div>
+        </div>
+        <div class="lw-ring-wrap">
+          <svg class="lw-ring-svg" width="180" height="180" viewBox="0 0 180 180">
+            <defs>
+              <linearGradient id="lwGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#2BBFBF"/>
+                <stop offset="100%" stop-color="#5C1A3A"/>
+              </linearGradient>
+            </defs>
+            <circle class="lw-ring-track" cx="90" cy="90" r="80"/>
+            <circle class="lw-ring-fill"  cx="90" cy="90" r="80" id="lw-arc"/>
+          </svg>
+          <div class="lw-ring-center">
+            <div class="lw-ring-num"  id="lw-done">—</div>
+            <div class="lw-ring-denom" id="lw-denom">/ —</div>
+          </div>
+        </div>
+        <div class="lw-ring-caption" id="lw-caption">—% сдали тест</div>
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
+        <div class="lw-divider"></div>
+        <div class="lw-filter-label">уровень</div>
+        <div class="lw-filter-btns">
+          <button class="lw-fbtn f-all active" data-lvl="all">Все</button>
+          <button class="lw-fbtn f-ls" data-lvl="ls">Starters</button>
+          <button class="lw-fbtn f-lm" data-lvl="lm">Movers</button>
+          <button class="lw-fbtn f-lf" data-lvl="lf">Flyers</button>
+          <button class="lw-fbtn f-lk" data-lvl="lk">KEY</button>
+          <button class="lw-fbtn f-lp" data-lvl="lp">PET</button>
+        </div>
+        <div class="lw-divider"></div>
+        <div class="lw-filter-label">Результат ≥70%</div>
+        <div class="lw-result-val" id="lw-filter-count">—</div>
+      </div>
 
-.footer-text {
-  font-size: 10px;
-  color: var(--text-hint);
-}
+      <!-- список -->
+      <div class="lw-right">
+        <div class="lw-board-head">
+          <div class="lw-board-title" id="lw-board-title">Топ-30 · результат ≥ 70%</div>
+          <div class="lw-board-tag">Осень 2026</div>
+        </div>
+        <div id="lw-board">
+          <div class="lw-loading"><div class="lw-spinner"></div><span>Загружаем…</span></div>
+        </div>
+      </div>
 
-.retry-btn {
-  font-size: 10px;
-  color: var(--teal);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  font-family: var(--font-body);
-}
-
-.error-card {
-  background: rgba(92,26,58,0.04);
-  border: 0.5px solid rgba(92,26,58,0.15);
-  border-radius: 12px;
-  padding: 20px 24px;
-  color: var(--bordeaux);
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-.error-card strong {
-  font-family: var(--font-head);
-  font-size: 11px;
-  display: block;
-  margin-bottom: 6px;
-}
-</style>
-</head>
-<body>
-
-<div id="widget">
-  <div class="loading-wrap">
-    <div class="spinner"></div>
-    <span>Загружаем данные…</span>
+    </div>
   </div>
-</div>
 
 <script>
-// ─── КОНФИГ ───────────────────────────────────────────────
-const SHEET_ID            = '1AvTpRonttEi1WWHFnKm1FIXVYZb9oJ3p99SURJwUDh4';
-const TOTAL_STUDENTS      = 79;
-const REFRESH_INTERVAL_MS = 20 * 60 * 1000; // 20 минут
-// ──────────────────────────────────────────────────────────
+(function() {
+  const SHEET_ID   = '1AvTpRonttEi1WWHFnKm1FIXVYZb9oJ3p99SURJwUDh4';
+  const TOTAL      = 74;
+  const REFRESH_MS = 20 * 60 * 1000;
 
-// Google Visualization API — не имеет CORS-ограничений для публичных таблиц
-function gvizUrl(sheetName) {
-  return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-         '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(sheetName);
-}
-
-async function fetchTable(sheetName) {
-  const resp = await fetch(gvizUrl(sheetName), { cache: 'no-store' });
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const text = await resp.text();
-  const m = text.match(/setResponse\(([\s\S]*)\)\s*;?\s*$/);
-  if (!m) throw new Error('Неожиданный формат ответа');
-  return JSON.parse(m[1]).table;
-}
-
-function cellStr(cell) {
-  if (!cell) return '';
-  return cell.v != null ? String(cell.v) : (cell.f || '');
-}
-
-function cellPct(cell) {
-  if (!cell) return null;
-  // Google хранит % как дробь: 78% → 0.78
-  if (typeof cell.v === 'number') {
-    return cell.v <= 1 ? Math.round(cell.v * 100) : Math.round(cell.v);
+  // Google Visualization API — работает без CORS с любого домена
+  function gvizUrl(sheetName) {
+    return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+           '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(sheetName);
   }
-  if (cell.f) {
-    const n = parseFloat(String(cell.f).replace('%','').replace(',','.'));
-    return isNaN(n) ? null : n;
-  }
-  return null;
-}
 
-function tableToStudents(table, pctIdx) {
-  const out = [];
-  if (!table || !table.rows) return out;
-  for (const row of table.rows) {
-    if (!row.c) continue;
-    const name = cellStr(row.c[3]).trim();
-    if (!name) continue;
-    out.push({
-      name,
-      level: cellStr(row.c[0]).trim(),
-      group: cellStr(row.c[1]).trim(),
-      pct:   cellPct(row.c[pctIdx])
+  async function fetchTable(sheetName) {
+    const resp = await fetch(gvizUrl(sheetName), { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    // Ответ завёрнут: google.visualization.Query.setResponse({...});
+    const m = text.match(/setResponse\(([\s\S]*)\)\s*;?\s*$/);
+    if (!m) throw new Error('Неожиданный формат ответа от Google');
+    return JSON.parse(m[1]).table;
+  }
+
+  function cellStr(cell) {
+    if (!cell) return '';
+    return cell.v != null ? String(cell.v) : (cell.f || '');
+  }
+
+  function cellPct(cell) {
+    if (!cell) return null;
+    // Google хранит % как десятичную дробь (78% → 0.78)
+    if (typeof cell.v === 'number') {
+      return cell.v <= 1 ? Math.round(cell.v * 100) : Math.round(cell.v);
+    }
+    if (cell.f) {
+      const n = parseFloat(String(cell.f).replace('%','').replace(',','.'));
+      return isNaN(n) ? null : n;
+    }
+    return null;
+  }
+
+  function tableToStudents(table, pctIdx) {
+    const out = [];
+    if (!table || !table.rows) return out;
+    for (const row of table.rows) {
+      if (!row.c) continue;
+      const name = cellStr(row.c[3]).trim();   // col D
+      if (!name) continue;
+      out.push({
+        name,
+        level: cellStr(row.c[0]).trim(),        // col A
+        group: cellStr(row.c[1]).trim(),         // col B
+        pct:   cellPct(row.c[pctIdx])
+      });
+    }
+    return out;
+  }
+
+  async function loadAll() {
+    const [t1, t2] = await Promise.all([
+      fetchTable('Data'),
+      fetchTable('Data_high')
+    ]);
+    return [
+      ...tableToStudents(t1, 15),   // Data:      % = col P (idx 15)
+      ...tableToStudents(t2, 18)    // Data_high: % = col S (idx 18)
+    ];
+  }
+
+  const CIRC = 2 * Math.PI * 80; // 502.6
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  }
+
+  function lwLvlClass(lvl) {
+    const l = lvl.toLowerCase();
+    if (l.includes('starter')) return 'lw-ls';
+    if (l.includes('mover'))   return 'lw-lm';
+    if (l.includes('flyer'))   return 'lw-lf';
+    if (l.includes('key'))     return 'lw-lk';
+    if (l.includes('prelim') || l.includes('pet')) return 'lw-lp';
+    return 'lw-lo';
+  }
+
+  // ── фильтр ──
+  const activeFilters  = new Set();
+  let   lwWroteTotal   = 0;
+  const lwWroteByLevel = {};
+  const LVL_NAMES = { ls:'Starters', lm:'Movers', lf:'Flyers', lk:'KEY', lp:'PET' };
+
+  function lwApplyFilter() {
+    const title   = document.getElementById('lw-board-title');
+    const counter = document.getElementById('lw-filter-count');
+    const items   = document.querySelectorAll('#lw-board .lw-item');
+    let visible = 0, wroteTotal = 0;
+
+    if (activeFilters.size === 0) {
+      items.forEach(el => el.classList.remove('hidden'));
+      visible    = items.length;
+      wroteTotal = lwWroteTotal;
+      if (title) title.textContent = 'Топ-30 · результат ≥ 70%';
+    } else {
+      items.forEach(el => {
+        const key  = el.dataset.lvlclass.replace('lw-', '');
+        const show = activeFilters.has(key);
+        el.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      activeFilters.forEach(k => { wroteTotal += (lwWroteByLevel[k] || 0); });
+      const sel = [...activeFilters].map(k => LVL_NAMES[k]).join(', ');
+      if (title) title.textContent = sel + ' · результат ≥ 70%';
+    }
+
+    const sharePct = wroteTotal > 0 ? Math.round(visible / wroteTotal * 100) : 0;
+    if (counter) counter.innerHTML =
+      `${visible} из ${wroteTotal}, <span class="lw-result-pct">${sharePct}%</span>`;
+  }
+
+  function lwSetupFilters() {
+    document.querySelectorAll('.lw-fbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lvl = btn.dataset.lvl;
+        if (lvl === 'all') {
+          activeFilters.clear();
+          document.querySelectorAll('.lw-fbtn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        } else {
+          document.querySelector('.lw-fbtn.f-all').classList.remove('active');
+          if (activeFilters.has(lvl)) { activeFilters.delete(lvl); btn.classList.remove('active'); }
+          else                        { activeFilters.add(lvl);    btn.classList.add('active'); }
+          if (activeFilters.size === 0)
+            document.querySelector('.lw-fbtn.f-all').classList.add('active');
+        }
+        lwApplyFilter();
+      });
     });
   }
-  return out;
-}
 
-async function loadStudents() {
-  const [t1, t2] = await Promise.all([
-    fetchTable('Data'),
-    fetchTable('Data_high')
-  ]);
-  return [
-    ...tableToStudents(t1, 15),   // Data:      % = col P (idx 15)
-    ...tableToStudents(t2, 18)    // Data_high: % = col S (idx 18)
-  ];
-}
+  async function lwRefresh() {
+    try {
+      const students = await loadAll();
+      const completed = students.filter(s => s.pct !== null);
+      const done = completed.length;
+      const pct  = Math.min(100, Math.round(done / TOTAL * 100));
 
-function formatTime(d) {
-  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-}
+      // кольцо
+      const arc = document.getElementById('lw-arc');
+      if (arc) arc.style.strokeDashoffset = CIRC * (1 - pct / 100);
+      const elDone = document.getElementById('lw-done');
+      if (elDone) elDone.textContent = done;
+      const elDenom = document.getElementById('lw-denom');
+      if (elDenom) elDenom.textContent = '/ ' + TOTAL;
+      const elCap = document.getElementById('lw-caption');
+      if (elCap) elCap.textContent = pct + '% сдали тест';
 
-function rankMeta(i) {
-  if (i === 0) return { icon: '🥇', cls: 'top-1', fill: 'fill-gold',   score: 'score-gold'   };
-  if (i === 1) return { icon: '🥈', cls: 'top-2', fill: 'fill-silver', score: 'score-silver' };
-  if (i === 2) return { icon: '🥉', cls: 'top-3', fill: 'fill-bronze', score: 'score-bronze' };
-  return       { icon: '',    cls: '',      fill: 'fill-default', score: 'score-default' };
-}
+      // время
+      const t = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+      const elUpd = document.getElementById('lw-upd');
+      if (elUpd) elUpd.textContent = 'обновлено в ' + t;
 
-function render(students, updatedAt) {
-  const completed = students.length;
-  const pct       = TOTAL_STUDENTS > 0 ? Math.min(100, Math.round((completed / TOTAL_STUDENTS) * 100)) : 0;
-  const remaining = Math.max(0, TOTAL_STUDENTS - completed);
+      // считаем написавших по уровням (для счётчика фильтра)
+      lwWroteTotal = done;
+      Object.keys(lwWroteByLevel).forEach(k => delete lwWroteByLevel[k]);
+      completed.forEach(s => {
+        const key = lwLvlClass(s.level).replace('lw-', '');
+        lwWroteByLevel[key] = (lwWroteByLevel[key] || 0) + 1;
+      });
 
-  // Топ-10 (≥ 70%), сортировка по убыванию
-  const top10 = students
-    .filter(s => s.pct !== null && s.pct >= 70)
-    .sort((a, b) => b.pct - a.pct)
-    .slice(0, 10);
+      // карточки топ-30
+      const MEDALS = ['🥇','🥈','🥉'];
+      const top30  = students
+        .filter(s => s.pct !== null && s.pct >= 70)
+        .sort((a, b) => b.pct - a.pct)
+        .slice(0, 30);
 
-  const leaderboardHTML = top10.length === 0
-    ? `<div class="empty-msg">Пока нет результатов ≥ 70%</div>`
-    : top10.map((s, i) => {
-        const m = rankMeta(i);
-        return `
-          <div class="leader-row ${m.cls}">
-            ${m.icon
-              ? `<div class="rank-icon">${m.icon}</div>`
-              : `<div class="rank-num">${i + 1}</div>`
-            }
-            <div class="leader-info">
-              <div class="leader-name">${s.name}</div>
-              <div class="leader-meta">${s.level}${s.group ? ' · ' + s.group : ''}</div>
-            </div>
-            <div class="leader-right">
-              <div class="mini-bar">
-                <div class="mini-bar-fill ${m.fill}" style="width:${s.pct}%"></div>
+      const board = document.getElementById('lw-board');
+      if (!board) return;
+      board.innerHTML = top30.length === 0
+        ? '<div class="lw-empty">Пока нет результатов ≥ 70%</div>'
+        : '<div class="lw-list">' + top30.map((s, i) => `
+            <div class="lw-item" data-lvlclass="${lwLvlClass(s.level)}">
+              <div class="lw-card-top">
+                ${i < 3 ? `<div class="lw-medal">${MEDALS[i]}</div>` : `<div class="lw-num">${i+1}</div>`}
+                <div class="lw-score">${Math.round(s.pct)}<span class="u">%</span></div>
               </div>
-              <div class="score-badge ${m.score}">${Math.round(s.pct)}%</div>
-            </div>
-          </div>`;
-      }).join('');
+              <div class="lw-name">${escapeHtml(s.name)}</div>
+              <div class="lw-tags">
+                <span class="lw-lvl ${lwLvlClass(s.level)}">${escapeHtml(s.level)}</span>
+                ${s.group ? `<span class="lw-group">${escapeHtml(s.group)}</span>` : ''}
+              </div>
+            </div>`).join('') + '</div>';
 
-  document.getElementById('widget').innerHTML = `
-    <div class="progress-card">
-      <div class="progress-top">
-        <div class="progress-left">
-          <div class="progress-eyebrow">Прогресс тестирования</div>
-          <div class="progress-numbers">
-            <span class="progress-count">${completed}</span>
-            <span class="progress-of">&thinsp;/&thinsp;${TOTAL_STUDENTS}</span>
-          </div>
-          <div class="progress-label-right">детей сдали тест</div>
-        </div>
-        <div class="pct-badge">${pct}%</div>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="bar-track">
-          <div class="bar-fill" style="width:${pct}%"></div>
-        </div>
-      </div>
-      <div class="progress-footer">
-        <span>Завершили тестирование</span>
-        <span>Ещё не сдали: ${remaining}</span>
-      </div>
-    </div>
-
-    <div class="section-eyebrow">Топ-10 — результат ≥ 70%</div>
-    <div class="leaderboard">${leaderboardHTML}</div>
-
-    <div class="widget-footer">
-      <div class="live-dot"></div>
-      <span class="footer-text">Обновлено в ${updatedAt} · следующее через 20 мин</span>
-    </div>
-  `;
-}
-
-function renderError(msg) {
-  document.getElementById('widget').innerHTML = `
-    <div class="error-card">
-      <strong>Не удалось загрузить данные</strong>
-      ${msg}<br><br>
-      Убедитесь, что в Google Таблице включён доступ <em>«Все, у кого есть ссылка — могут просматривать»</em>.
-      <br><br>
-      <button class="retry-btn" onclick="refresh()">Попробовать снова</button>
-    </div>
-  `;
-}
-
-async function refresh() {
-  try {
-    const students = await loadStudents();
-    render(students, formatTime(new Date()));
-  } catch (e) {
-    console.error('Widget error:', e);
-    renderError(e.message);
+      // применяем текущий фильтр (сохраняется между обновлениями)
+      lwApplyFilter();
+    } catch(e) {
+      const b = document.getElementById('lw-board');
+      if (b) b.innerHTML = `<div class="lw-empty">Ошибка загрузки: ${e.message}</div>`;
+    }
   }
-}
 
-// Первая загрузка + авто-обновление каждые 20 мин
-refresh();
-setInterval(refresh, REFRESH_INTERVAL_MS);
-</script>
-</body>
-</html>
+  // запуск: фильтры однократно, данные сразу и каждые 20 мин
+  lwSetupFilters();
+  lwRefresh();
+  setInterval(lwRefresh, REFRESH_MS);
+})();
+</script></body></html>
